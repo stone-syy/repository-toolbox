@@ -54,9 +54,9 @@ class Toolbox(object):
     def __init__(self, master):
         self.__doc__ = '主类，包括了界面框架和组件定义及功能函数定义'
         self.master = master
-        self.widgest()
+        self.widgets()
 
-    def widgest(self):
+    def widgets(self):
 
         """定义组件及组件位置"""
 
@@ -98,6 +98,37 @@ class Toolbox(object):
         self.port_enter.grid(row=0, column=2)
         self.str_tag.grid(row=1, column=0)
         self.str_enter.grid(row=1, column=1)
+
+        # 功能函数
+
+    def _telnet(self):
+        pass
+
+    def _ping(self):
+        pass
+
+    def _md5(self):
+        pass
+
+    def _sha1(self):
+        pass
+
+    def _sha128(self):
+        pass
+
+    def _sha256(self):
+        pass
+
+    def _sha512(self):
+        pass
+
+    def _file_num(self):
+        pass
+
+    def _list_file(self):
+        pass
+
+
 # 事件循环
 
 
