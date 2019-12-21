@@ -14,8 +14,9 @@ from tkinter import *
 from os import path, listdir, walk
 from tkinter import messagebox as msg
 from telnetlib import Telnet
-from mass_ping import MassPing
+from font import font_list
 import re
+import os
 
 
 class Basic(object):
@@ -96,10 +97,9 @@ class Toolbox(object):
         self.sha128b = Button(self.frame_2, text='sha224', width=7, command=self._sha128)
         self.sha256b = Button(self.frame_2, text='sha256', width=7, command=self._sha256)
         self.sha512b = Button(self.frame_2, text='sha512', width=7, command=self._sha512)
-        self.filenum = Button(self.frame_2, text='文件数量', width=7)
-        self.listfile = Button(self.frame_2, text='列出文件', width=7)
+        self.filenum = Button(self.frame_2, text='文件数量', width=7, command=self._file_num)
+        self.listfile = Button(self.frame_2, text='列出文件', width=7, command=self._list_file)
         self.cleanb = Button(self.frame_2, text='清除记录', width=7, command=self._clean)
-        self.above = Button(self.frame_2, text='关于', width=7)
         self.exitb = Button(self.frame_2, text='退出程序', width=7, command=sys.exit)
 
         # 文本框和滚动条
@@ -127,12 +127,11 @@ class Toolbox(object):
         self.filenum.grid(row=1, column=0)
         self.listfile.grid(row=1, column=1)
         self.cleanb.grid(row=1, column=2)
-        self.above.grid(row=1, column=3)
-        self.exitb.grid(row=1, column=4)
+        self.exitb.grid(row=1, column=3)
 
         self.text.grid(row=0, column=0)
         self.scroball.grid(row=0, column=1)
-        self.text.config(yscrollcommand=self.scroball.set, width=55)
+        self.text.config(yscrollcommand=self.scroball.set, width=43, height=20, font=font_list[4])
 
         # 功能函数
 
@@ -204,10 +203,31 @@ class Toolbox(object):
             self.str_enter.delete(0, END)
 
     def _file_num(self):
-        pass
+        file_path = self.str_enter.get()
+        if file_path == '':
+            pass
+        else:
+            if os.path.exists(file_path):
+                file_sum = 0
+                for root, dirs, files in walk(file_path):
+                    for file in files:
+                        file_sum += 1
+                msg.showinfo(title='Info', message='文件路径：{}；文件数量{}'.format(file_path, file_sum))
+            else:
+                msg.showerror(title='error', message='path not exits'.title())
 
     def _list_file(self):
-        pass
+        file_path = self.str_enter.get()
+        if file_path == '':
+            msg.showerror(title='Error', message='None')
+        else:
+            if os.path.exists(file_path):
+                file = os.listdir(file_path)
+                for files in file:
+                    if os.path.isfile(os.path.join(file_path, files)):
+                        self.text.insert(0.0, '%s\n' % files)
+            else:
+                msg.showerror('Error', message='file path not found'.title())
 
     def _clean(self):
         self.text.delete(0.0, END)
@@ -218,6 +238,7 @@ class Toolbox(object):
 
 window = Tk()
 window.title('Tool Box')
+window.iconbitmap('ico.ico')
 App = Toolbox(window)
 window.mainloop()
 
