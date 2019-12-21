@@ -238,7 +238,6 @@ class Toolbox(object):
 
 window = Tk()
 window.title('Tool Box')
-window.iconbitmap('ico.ico')
 App = Toolbox(window)
 window.mainloop()
 
