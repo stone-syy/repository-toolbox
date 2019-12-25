@@ -4,10 +4,15 @@
 # Author: Mr.shi
 # E-mail: example@qq.com
 # version:1.0.0
-
+# version history
 """
 change log:
-    pass
+    V1.0.1
+    1、优化错误提示，加入try...expect
+    2、增加GUI界面图标,调整界面大小和字体
+    3、增加‘关于’button，介绍该软件
+    4、对IP、port等输入字符加strip方法，防止因为空格导致结果与预期不符
+
 """
 from hashlib import *
 from tkinter import *
@@ -31,9 +36,9 @@ class Basic(object):
         """这个函数是对用户输入的字符串进行hash，并返回hash值"""
         try:
             if pwd == '':
-                msg.showwarning(title='Warn', message='没有输入内容，请输入！')
+                msg.showwarning(title='Warn', message='input content is none'.title())
             else:
-                password = pwd
+                password = pwd.strip()
                 hash_method = method
                 hash_method.update(password.encode('utf-8'))
                 return hash_method.hexdigest()
@@ -49,7 +54,7 @@ class Basic(object):
             result = rule.match(ip)
             return result
         except:
-            msg.showinfo(title='Info', message='The is a error'.title())
+            msg.showinfo(title='Info', message='wow,i got an error'.title())
         #finally:
             #pass
 
@@ -81,13 +86,13 @@ class Toolbox(object):
         self.frame_3 = Frame()
 
         # create gui module
-        self.telnet_tag = Label(self.frame_1, text='请输入IP/ Port:', font=('Aria', 10))
-        self.str_tag = Label(self.frame_1, text='请输入Path/Str:', font=('Aria', 10))
+        self.telnet_tag = Label(self.frame_1, text='请输入IP/ Port:', font=font_list[3])
+        self.str_tag = Label(self.frame_1, text='请输入Path/Str:', font=font_list[3])
 
         # create enter
         self.ip_enter = Entry(self.frame_1, width=30)
-        self.port_enter = Entry(self.frame_1, width=10)
-        self.str_enter = Entry(self.frame_1, width=41)
+        self.port_enter = Entry(self.frame_1, width=12)
+        self.str_enter = Entry(self.frame_1, width=43)
 
         # create button
         self.telnetb = Button(self.frame_2, text='Telnet', width=7, command=self._telnet)
@@ -100,6 +105,7 @@ class Toolbox(object):
         self.filenum = Button(self.frame_2, text='文件数量', width=7, command=self._file_num)
         self.listfile = Button(self.frame_2, text='列出文件', width=7, command=self._list_file)
         self.cleanb = Button(self.frame_2, text='清除记录', width=7, command=self._clean)
+        self.aboveb = Button(self.frame_2, text='About', width=7, command=self._about)
         self.exitb = Button(self.frame_2, text='退出程序', width=7, command=sys.exit)
 
         # 文本框和滚动条
@@ -127,37 +133,39 @@ class Toolbox(object):
         self.filenum.grid(row=1, column=0)
         self.listfile.grid(row=1, column=1)
         self.cleanb.grid(row=1, column=2)
-        self.exitb.grid(row=1, column=3)
+        self.aboveb.grid(row=1, column=3)
+        self.exitb.grid(row=1, column=4)
 
         self.text.grid(row=0, column=0)
         self.scroball.grid(row=0, column=1)
-        self.text.config(yscrollcommand=self.scroball.set, width=43, height=20, font=font_list[4])
+        self.text.config(yscrollcommand=self.scroball.set, width=45, height=20, font=font_list[4])
 
         # 功能函数
 
     def _telnet(self):
         """telnet 函数"""
-        ip_address = self.ip_enter.get()
-        port = self.port_enter.get()
-        if ip_address and port != '':
-            if Basic().ip_check(ip=self.ip_enter.get()) is None:
-                msg.showerror(title='Error', message='ip address error,please check')
-            else:
-                connect = Telnet(host=ip_address, port=port, timeout=3)
-                connect_info = connect.sock
-                info = ('src:', str(connect_info).split('=')[5].split('(')[1].split(')')[0],
-                        'dst:', str(connect_info).split('=')[6].split('(')[1].split(')')[0])
-                self.text.insert(0.0, info)
-                self.ip_enter.delete(0, END)
-                self.port_enter.delete(0, END)
-        elif ip_address == '':
-            msg.showerror(title='Error', message='missing IP parameters'.title())
-        elif port != '':
-            msg.showwarning(title='Error', message='missing port parameters'.title())
+        ip_address = self.ip_enter.get().strip()
+        port = self.port_enter.get().strip()
+        try:
+            if ip_address and port != '':
+                if Basic().ip_check(ip=ip_address) is None:
+                    msg.showerror(title='Error', message='ip address error,please check')
+                else:
+                    connect = Telnet(host=ip_address, port=port, timeout=3)
+                    connect_info = connect.sock
+                    info = ('src:', str(connect_info).split('=')[5].split('(')[1].split(')')[0],
+                            'dst:', str(connect_info).split('=')[6].split('(')[1].split(')')[0])
+                    self.text.insert(0.0, info, 1.0, 'network connect is successful.'.title())
+                    self.ip_enter.delete(0, END)
+                    self.port_enter.delete(0, END)
+            elif ip_address == '':
+                msg.showerror(title='Error', message='missing IP parameters'.title())
+            elif port != '':
+                msg.showwarning(title='Error', message='missing port parameters'.title())
         # elif port == '' and ip_address != '':
             # msg.showwarning(title='Warning', message='missing port parameters'.title())
-    # except:
-        # msg.showerror(title='Error', message='遇到了一个不可描述的错误')
+        except:
+            msg.showerror(title='Error', message='wow,i got an error'.title())
 
     def _ping(self):
         pass
@@ -183,7 +191,7 @@ class Toolbox(object):
         if self.str_enter.get() == '':
             pass
         else:
-            self.text.insert(0.0, '你输入的字符为%s;sha224值为：%s' % (self.str_enter.get(), sha224_value))
+            self.text.insert(0.0, '你输入的字符为%s;\n sha224值为：%s' % (self.str_enter.get(), sha224_value))
             self.str_enter.delete(0, END)
 
     def _sha256(self):
@@ -191,7 +199,7 @@ class Toolbox(object):
         if self.str_enter.get() == '':
             pass
         else:
-            self.text.insert(0.0, '你输入的字符为%s;sha256值为:%s' % (self.str_enter.get(), sha256_value))
+            self.text.insert(0.0, '你输入的字符为%s;\n sha256值为:%s' % (self.str_enter.get(), sha256_value))
             self.str_enter.delete(0, END)
 
     def _sha512(self):
@@ -199,13 +207,13 @@ class Toolbox(object):
         if self.str_enter.get() == '':
             pass
         else:
-            self.text.insert(0.0, '你输入的字符为%s;sha512值为%s' % (self.str_enter.get(), sha512_value))
+            self.text.insert(0.0, '你输入的字符为%s;\n sha512值为%s' % (self.str_enter.get(), sha512_value))
             self.str_enter.delete(0, END)
 
     def _file_num(self):
         file_path = self.str_enter.get()
         if file_path == '':
-            pass
+            msg.showerror(title='Error', message='missing path parameters'.title())
         else:
             if os.path.exists(file_path):
                 file_sum = 0
@@ -219,18 +227,27 @@ class Toolbox(object):
     def _list_file(self):
         file_path = self.str_enter.get()
         if file_path == '':
-            msg.showerror(title='Error', message='None')
+            msg.showerror(title='Error', message='no input path,please enter'.title())
         else:
-            if os.path.exists(file_path):
-                file = os.listdir(file_path)
-                for files in file:
-                    if os.path.isfile(os.path.join(file_path, files)):
-                        self.text.insert(0.0, '%s\n' % files)
-            else:
-                msg.showerror('Error', message='file path not found'.title())
+            try:
+                if os.path.exists(file_path):
+                    file = os.listdir(file_path)
+                    for files in file:
+                        if os.path.isfile(os.path.join(file_path, files)):
+                            self.text.insert(0.0, '%s\n' % files)
+                else:
+                    msg.showerror('Error', message='file path not exist'.title())
+            except:
+                msg.showerror(title='Error', message='wow,i got an error')
 
     def _clean(self):
         self.text.delete(0.0, END)
+
+    def _about(self):
+        msg.showinfo(title='About', message="""
+        Author: Mr.shi
+        create time: 2019-12-22
+        """)
 
 
 # 事件循环
@@ -238,6 +255,7 @@ class Toolbox(object):
 
 window = Tk()
 window.title('Tool Box')
+window.iconbitmap(r'D:\Python\repository-toolbox\ico.ico')
 App = Toolbox(window)
 window.mainloop()
 
