@@ -6,4 +6,4 @@ change log:
     2、增加GUI界面图标,调整界面大小和字体
     3、增加‘About’button，介绍该软件
     4、对IP、port等输入字符加strip方法，防止因为空格导致结果与预期不符
-    5、对file_num函数增加显示统计耗时功能
+    5、对file_num函数增加显示统计耗时功能.
