@@ -3,15 +3,16 @@
 # data time: 2019-12-17
 # Author: Mr.shi
 # E-mail: example@qq.com
-# version:1.0.0
+# version:1.0.1
 # version history
 """
 change log:
     V1.0.1
     1、优化错误提示，加入try...expect
     2、增加GUI界面图标,调整界面大小和字体
-    3、增加‘关于’button，介绍该软件
+    3、增加‘About’button，介绍该软件
     4、对IP、port等输入字符加strip方法，防止因为空格导致结果与预期不符
+    5、对file_num函数增加显示统计耗时功能
 
 """
 from hashlib import *
@@ -20,6 +21,7 @@ from os import path, listdir, walk
 from tkinter import messagebox as msg
 from telnetlib import Telnet
 from font import font_list
+from time import time
 import re
 import os
 
@@ -211,6 +213,7 @@ class Toolbox(object):
             self.str_enter.delete(0, END)
 
     def _file_num(self):
+        start = time()
         file_path = self.str_enter.get()
         if file_path == '':
             msg.showerror(title='Error', message='missing path parameters'.title())
@@ -220,7 +223,9 @@ class Toolbox(object):
                 for root, dirs, files in walk(file_path):
                     for file in files:
                         file_sum += 1
-                msg.showinfo(title='Info', message='文件路径：{}；文件数量{}'.format(file_path, file_sum))
+                end = time()
+                msg.showinfo(title='Info',
+                             message='文件路径：{}；文件数量{}\n耗时:{:.2f}秒'.format(file_path, file_sum, (end-start)))
             else:
                 msg.showerror(title='error', message='path not exits'.title())
 
@@ -244,10 +249,14 @@ class Toolbox(object):
         self.text.delete(0.0, END)
 
     def _about(self):
-        msg.showinfo(title='About', message="""
-        Author: Mr.shi
-        create time: 2019-12-22
-        """)
+        msg.showinfo(title='About', message="Author: Mr.shi\n"
+                                            "Create time: 2019.12.22\n"
+                                            "Version: 1.0.1\n"
+                                            "Usage: \n"
+                                            "   1、telnet时输入IP地址和port，点击Telnet按钮即可\n"
+                                            "   2、查找文件、计算文件数量时请输入文件路径（绝对路径）\n"
+                                            "   3、hash时输入你想要hash的字符，点击对应的按钮即可"
+                     )
 
 
 # 事件循环
