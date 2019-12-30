@@ -260,8 +260,6 @@ class Toolbox(object):
 
 
 # 事件循环
-
-
 window = Tk()
 window.title('Tool Box')
 window.iconbitmap(r'D:\Python\repository-toolbox\ico.ico')
