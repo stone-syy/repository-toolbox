@@ -52,7 +52,7 @@ class Basic(object):
         """这个函数利用re库对用户输入的IP地址进行合法性校验"""
 
         try:
-            rule = re.compile(r'^([1-9][0-9]{1,2})\.([1-9][0-9]{1,2})\.([1-9][0-9]{1,2})\.([1-9][0-9]{1,2})$')
+            rule = re.compile(r'^([1-9][0-9]{0,2})\.([1-9][0-9]{0,2})\.([1-9][0-9]{0,2})\.([1-9][0-9]{0,2})$')
             result = rule.match(ip)
             return result
         except:
@@ -152,6 +152,7 @@ class Toolbox(object):
             if ip_address and port != '':
                 if Basic().ip_check(ip=ip_address) is None:
                     msg.showerror(title='Error', message='ip address error,please check')
+                    #msg.showinfo(message=ip_address)
                 else:
                     connect = Telnet(host=ip_address, port=port, timeout=3)
                     connect_info = connect.sock
@@ -162,12 +163,12 @@ class Toolbox(object):
                     self.port_enter.delete(0, END)
             elif ip_address == '':
                 msg.showerror(title='Error', message='missing IP parameters'.title())
-            elif port != '':
+            elif port == '':
                 msg.showwarning(title='Error', message='missing port parameters'.title())
         # elif port == '' and ip_address != '':
             # msg.showwarning(title='Warning', message='missing port parameters'.title())
         except:
-            msg.showerror(title='Error', message='wow,i got an error'.title())
+            msg.showerror(title='Error', message='wow,i gotl an error'.title())
 
     def _ping(self):
         pass
@@ -262,7 +263,7 @@ class Toolbox(object):
 # 事件循环
 window = Tk()
 window.title('Tool Box')
-window.iconbitmap(r'D:\Python\repository-toolbox\ico.ico')
+#window.iconbitmap('ico.ico')
 App = Toolbox(window)
 window.mainloop()
 
