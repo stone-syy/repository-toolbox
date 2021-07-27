@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../repository-study/.idea/repository-study.iml" filepath="$PROJECT_DIR$/../repository-study/.idea/repository-study.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../repository-test/.idea/repository-test.iml" filepath="$PROJECT_DIR$/../repository-test/.idea/repository-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/repository-toolbox.iml" filepath="$PROJECT_DIR$/.idea/repository-toolbox.iml" />
     </modules>
   </component>
