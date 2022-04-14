@@ -64,7 +64,7 @@ def capture_sina():
 
 def capture_user_info(uid):
     """
-    抓取用户信息
+    抓取用户信息,这儿需要先使用自己账号登录，把cookie等请求头复制过来
     :return:
     """
     user_info_url = "https://weibo.com/ajax/profile/detail?uid=%s" % uid
@@ -81,7 +81,7 @@ def capture_user_info(uid):
     userinfo = get.text
     userinfo_json = json.loads(userinfo)
     #print(userinfo_json)
-
+    # 解析用户数据
     area = userinfo_json['data']['ip_location'].strip()
     sex = userinfo_json['data']['gender'].strip()
     age = userinfo_json['data']['birthday'].strip()
@@ -111,6 +111,12 @@ def capture_user_info(uid):
 
 
 def save_data_to_csv(column, encodeing='utf-8'):
+    """
+    保存数据到CSV文件，方便后续读取分析
+    :param column:
+    :param encodeing:
+    :return:
+    """
     with open(csv_path, 'a', newline='', encoding=encodeing) as csvfile:
         csv_write = csv.writer(csvfile)
         csv_write.writerow(column)
