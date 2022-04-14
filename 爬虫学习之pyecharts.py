@@ -1,9 +1,10 @@
+import collections
 import time
 import os, numpy
 from pyecharts.charts import WordCloud
 from pyecharts.globals import SymbolType
 from pyecharts import options
-import pyecharts as pye
+from pyecharts.charts import Map, Pie
 import requests, random, json
 import re, csv, jieba
 import jieba.analyse
@@ -80,28 +81,39 @@ def capture_user_info(uid):
     userinfo = get.text
     userinfo_json = json.loads(userinfo)
     #print(userinfo_json)
-    area = userinfo_json['data']['ip_location']
-    sex = userinfo_json['data']['gender']
-    age = userinfo_json['data']['birthday']
+
+    area = userinfo_json['data']['ip_location'].strip()
+    sex = userinfo_json['data']['gender'].strip()
+    age = userinfo_json['data']['birthday'].strip()
     #school = userinfo_json['education']['school']
-    area_location = userinfo_json['data']['location']
+    area_location = userinfo_json['data']['location'].strip()
     sina_data = []
+    # 数据清洗
     if '其他' in area or '海外' in area:
         area = ''
     elif '其他' in area_location or '海外' in area_location:
         area_location = ''
-    elif sex in 'm':
+    elif str(sex) == 'm':
         sex = '男'
-    elif sex in 'f':
+    elif str(sex) == 'f':
         sex = '女'
+    elif age.startwith('19') or age.startwith('20'):
+        age = age[:3]
     # 数据顺序：用户ID，所在地，性别，年龄
     sina_data.append(uid)
-    sina_data.append(area)
-    sina_data.append(sex)
-    sina_data.append(age[:3])
+    sina_data.append(area[5:])
+    sina_data.append(sex.replace(r'f', '女'))
+    sina_data.append(age)
     sina_data.append(area_location)
 
     # 保存数据
+    save_data_to_csv(column=sina_data)
+
+
+def save_data_to_csv(column, encodeing='utf-8'):
+    with open(csv_path, 'a', newline='', encoding=encodeing) as csvfile:
+        csv_write = csv.writer(csvfile)
+        csv_write.writerow(column)
 
 
 def cut_data():
@@ -128,7 +140,7 @@ def create_word_cloud():
     pyplot.show()
 
 
-def analysis_sina_content():
+def analyse_sina_content():
     """
     分析微博内容,使用pycharts
     :return:
@@ -140,26 +152,94 @@ def analysis_sina_content():
     jieba.analyse.set_stop_words(STOP_WORD_FILE_PATH)
     # 词数统计
     words_count_list = jieba.analyse.textrank(comment_content, topK=100, withWeight=True)
-    print(words_count_list)
+    #print(words_count_list)
     # 生成词云
     word_cloud = (
         WordCloud()
             .add("", words_count_list, word_size_range=[20, 100], shape=SymbolType.DIAMOND)
             .set_global_opts(title_opts=options.TitleOpts(title="樊振东微博超话内容分析"))
     )
-    word_cloud.render('word_cloud.html')
+    word_cloud.render('D:/word_cloud.html')
+
+
+def read_csv_data(index) -> dict:
+    """
+    读取CSV文件内容，将其封装为一个方法，方便以后读取
+    :param index:
+    :return:
+    """
+    with open(csv_path, 'r', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        column = [columns[index] for columns in reader]
+        #print(column)
+        dic = collections.Counter(column)
+        if '' in dic:
+            dic.pop('')
+        return dic
+
+
+def analyse_city():
+    """
+    根据IP地址所在地分析微博粉丝所处的城市
+    :return:
+    """
+    dic = read_csv_data(index=1)
+    city_count = [list(z) for z in zip(dic.keys(), dic.values())]
+    maps = (
+        Map()
+        .add("樊振东粉丝分布图", city_count, "china")
+        .set_global_opts(title_opts=options.TitleOpts(title="樊振东粉丝分布图"),
+                         visualmap_opts=options.VisualMapOpts(max_=300)
+                         )
+        )
+    maps.render("D:/map.html")
+
+
+def analyse_gender():
+    """
+    根据抓取的用户性别数据对粉丝数据进行性别分析
+    :return:
+    """
+    gender = read_csv_data(index=2)
+
+    gender_count = [list(z) for z in zip(gender.keys(), gender.values())]
+    pie = (
+        Pie()
+        .add("Gender Analyse", gender_count)
+        .set_colors(["red", "blue", "green", "orange"])
+        .set_global_opts(title_opts=options.TitleOpts("樊振东粉丝性别分析"))
+        .set_series_opts(label_opts=options.LabelOpts(formatter="{b}:{c}"))
+    )
+    pie.render("d:/gender_analyse.html")
+
+
+def fetch_sina(page):
+    """
+    调用相关批量抓取
+    :return:
+    """
+    if os.path.exists(comment_path) or os.path.exists(csv_path):
+        os.remove(comment_path) or os.remove(csv_path)
+    for i in range(page):
+        print("正在抓取第{}页".format(i))
+        try:
+            capture_sina()
+            time.sleep(random.random()*6)
+        except KeyError as key_error:
+            print("无法匹配到key:{}".format(key_error))
+            continue
+        except:
+            print("有错误，但是我们还是要继续爬，let go!")
+            continue
 
 
 if __name__ == "__main__":
-    #login_sina(codes=618353)
-    #capture_user_info(uid=6657656414)
-    for i in range(2):
-        print("正在抓取第{}页".format(i))
-        capture_sina()
-        time.sleep(random.random()*5)
     #cut_data()
     #create_word_cloud()
-    #analysis_sina_content()
+    #fetch_sina(page=400)
+    analyse_sina_content()
+    analyse_city()
+    analyse_gender()
 
 
 
