@@ -72,7 +72,7 @@ def create_word_cloud():
 
 
 if __name__ == '__main__':
-    multiple_capture()
+    #multiple_capture()
     cut_data()
     create_word_cloud()
 
