@@ -30,18 +30,18 @@ def capture_sina():
     if min_since_id:
         weibo_url = weibo_url + '&since_id=' + min_since_id
     head = {
-        "User-Agent":"Mozilla/5.0",
-        "Referer":"https://m.weibo.cn/p/1008080391332928de4da0860b025d281356e1/super_index?jumpfrom=weibocom"
+        "User-Agent": "Mozilla/5.0",
+        "Referer": "https://m.weibo.cn/p/1008080391332928de4da0860b025d281356e1/super_index?jumpfrom=weibocom"
     }
-    #try:
+    # try:
     result = session.post(url=weibo_url, headers=head)
     result.raise_for_status()
     r_json = json.loads(result.text)
-    #except:
-        #print("fail")
+    # except:
+        # print("fail")
     data = r_json['data']['cards']
     card_group = data[2]['card_group'] if len(data) > 1 else data[0]['card_group']
-    #print(card_group)
+    # print(card_group)
     for comment in card_group:
         mblog = comment['mblog']
         user = mblog['user']
@@ -49,15 +49,15 @@ def capture_sina():
         since_id = mblog['id']
         sina_text = re.compile(r'<[^>]+>', re.S).sub(' ', mblog['text'])
         sina_text = sina_text.replace('樊振东', '').strip().replace(r'#连续24个月世界排名第一#', '')
-        #print(sina_text)
+        # print(sina_text)
         if min_since_id:
             min_since_id = since_id if min_since_id > since_id else min_since_id
         else:
             min_since_id = since_id
-        #try:
+        # try:
         capture_user_info(user_id)
-        #except:
-        #print("爬取用户信息失败")
+        # except:
+        # print("爬取用户信息失败")
         with open(comment_path, 'a+', encoding='utf-8') as files:
             files.write(sina_text+'\n')
 
@@ -80,12 +80,12 @@ def capture_user_info(uid):
         print("抓取失败")
     userinfo = get.text
     userinfo_json = json.loads(userinfo)
-    #print(userinfo_json)
+    # print(userinfo_json)
     # 解析用户数据
     area = userinfo_json['data']['ip_location'].strip()
     sex = userinfo_json['data']['gender'].strip()
     age = userinfo_json['data']['birthday'].strip()
-    #school = userinfo_json['education']['school']
+    # school = userinfo_json['education']['school']
     area_location = userinfo_json['data']['location'].strip()
     sina_data = []
     # 数据清洗
@@ -158,7 +158,7 @@ def analyse_sina_content():
     jieba.analyse.set_stop_words(STOP_WORD_FILE_PATH)
     # 词数统计
     words_count_list = jieba.analyse.textrank(comment_content, topK=100, withWeight=True)
-    #print(words_count_list)
+    # print(words_count_list)
     # 生成词云
     word_cloud = (
         WordCloud()
@@ -177,7 +177,7 @@ def read_csv_data(index) -> dict:
     with open(csv_path, 'r', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         column = [columns[index] for columns in reader]
-        #print(column)
+        # print(column)
         dic = collections.Counter(column)
         if '' in dic:
             dic.pop('')
@@ -240,12 +240,9 @@ def fetch_sina(page):
 
 
 if __name__ == "__main__":
-    #cut_data()
-    #create_word_cloud()
-    #fetch_sina(page=400)
+    # cut_data()
+    # create_word_cloud()
+    # fetch_sina(page=400)
     analyse_sina_content()
     analyse_city()
     analyse_gender()
-
-
-
