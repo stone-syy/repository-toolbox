@@ -28,7 +28,7 @@ def capture_sina():
     global min_since_id
     weibo_url = "https://m.weibo.cn/api/container/getIndex?jumpfrom=weibocom&containerid=1008080391332928de4da0860b025d281356e1_-_feed&since_id=4757578200385829"
     if min_since_id:
-        weibo_url = weibo_url + '&since_id=' + min_since_id
+        weibo_url = weibo_url + '&since_id=' + min_since_id  # 构造抓取URL
     head = {
         "User-Agent": "Mozilla/5.0",
         "Referer": "https://m.weibo.cn/p/1008080391332928de4da0860b025d281356e1/super_index?jumpfrom=weibocom"
@@ -45,9 +45,10 @@ def capture_sina():
     for comment in card_group:
         mblog = comment['mblog']
         user = mblog['user']
-        user_id = user['id']
-        since_id = mblog['id']
+        user_id = user['id']  # 获取用户ID
+        since_id = mblog['id']  # 微博分页机制是利用这个since_id实现的
         sina_text = re.compile(r'<[^>]+>', re.S).sub(' ', mblog['text'])
+        # 去除评论内容中无效的内容
         sina_text = sina_text.replace('樊振东', '').strip().replace(r'#连续24个月世界排名第一#', '')
         # print(sina_text)
         if min_since_id:
@@ -64,15 +65,14 @@ def capture_sina():
 
 def capture_user_info(uid):
     """
-    抓取用户信息,这儿需要先使用自己账号登录，把cookie等请求头复制过来
+    抓取用户信息,这儿需要先使用自己账号登录，我们先在浏览器登录在把cookie等请求头复制过来
     :return:
     """
     user_info_url = "https://weibo.com/ajax/profile/detail?uid=%s" % uid
     headers = {
         "user-agent": "Mozilla/5.0",
         "referer": "https://weibo.com/u/6026794900",
-        "cookie": "SINAGLOBAL=8057188833066.809.1649769807945; ariaDefaultTheme=default; ariaFixed=true; ariaReadtype=1; ariaMouseten=null; ariaStatus=false; wb_view_log=1536*8641.25; SCF=AhJI-CCcdeC5wboPkOQHCBq2yAGkwbVNnGufqivUrvbrkHTyezhqkXoAxdZGNwoDm6mbUCzX8szsQnFBQ_OwTBw.; ULV=1649910057730:5:5:5:8587026511188.107.1649910057719:1649906341228; SUB=_2A25PU92YDeRhGeBI7lUX9SjIyjiIHXVsv-PQrDV8PUJbkNB-LXbukW1NRpSSbTi7HcYVvcz8I-vfkxN_pDQoXVqt; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WFhw6PoWn1Fxs2qm1FnXdwu5NHD95QcSo-NSo-cSh2XWs4DqcjEi--Xi-zRiKn7i--4i-2EiK.Ni--fi-z7iKysi--fi-z7iKysi--NiKLWiKnXMNxadJ-t; XSRF-TOKEN=iA-mdGRazzHgtdwkVPTyCacs; WBPSESS=Dt2hbAUaXfkVprjyrAZT_NdHgjmJfDCJ3dfv4uRqLh0FkNxN-Gr2I8fTJJ4cMeTuYh33maQGPKjv9hKuHI8uf-0jYLj8w6ba6ets64G335UVwf3XqGoD-HdIQyMLaARVpdS-SjoIdz6wD2DH1J5Tbr-hpG68wOGq09Jw-FxNOwO9BVDS6WkpNJRnH6HrxlOt684bJO5LmMGtGDwszxoBVw=="
-    }
+        "cookie": "将浏览器中cookie完整复制过来"}
     try:
         get = session.get(url=user_info_url, headers=headers)
         get.raise_for_status()
@@ -82,11 +82,11 @@ def capture_user_info(uid):
     userinfo_json = json.loads(userinfo)
     # print(userinfo_json)
     # 解析用户数据
-    area = userinfo_json['data']['ip_location'].strip()
-    sex = userinfo_json['data']['gender'].strip()
-    age = userinfo_json['data']['birthday'].strip()
-    # school = userinfo_json['education']['school']
-    area_location = userinfo_json['data']['location'].strip()
+    area = userinfo_json['data']['ip_location'].strip()  # 获取地区,这个地区是IP所属地区
+    sex = userinfo_json['data']['gender'].strip()  # 获取性别,m代表男生，f代表女生
+    age = userinfo_json['data']['birthday'].strip()  # 获取年龄,但是根据抓取分析看，很多用户都开启只显示星座，价值不大
+    # school = userinfo_json['education']['school']  # 获取用户教育信息，很多用户没有写，价值也不大
+    area_location = userinfo_json['data']['location'].strip()  # 这个是用户自己填的地区,无法确保数据,在分析时使用IP归属地
     sina_data = []
     # 数据清洗
     if '其他' in area or '海外' in area:
